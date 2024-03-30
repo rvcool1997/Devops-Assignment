@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  go_app:
+    build:
+      context: ./go_app
+    ports:
+      - "8080:8080"
+
+  nextjs_app:
+    build:
+      context: ./nextjs_app
+    ports:
+      - "3000:3000"
+
+  wordpress_app:
+    build:
+      context: ./wordpress_app
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: example_user
+      WORDPRESS_DB_PASSWORD: example_password
+      WORDPRESS_DB_NAME: example_db
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: example_db
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+      MYSQL_ROOT_PASSWORD: root_password
