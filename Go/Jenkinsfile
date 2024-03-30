@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/rvcool1997/Devops-Assignment.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'go build -o myapp'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'go test ./...'
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                script {
+                    docker.build('yourimage:tag')
+                }
+            }
+        }
+        stage('Docker Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.example.com', 'credentials-id') {
+                        docker.image('yourimage:tag').push('latest')
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'scp myapp user@server:/path/to/deployment'
+            }
+        }
+    }
+    
+    
+    post {
+        always {
+            // Execute linting and fail the pipeline if issues are found
+            sh 'gofmt -l . | read && echo "Go code is not properly formatted" && exit 1 || true'
+            sh 'golint ./... | read && echo "Go code has linting issues" && exit 1 || true'
+            sh 'go vet ./... | read && echo "Go code has vet issues" && exit 1 || true'
+        }
+    }
+}

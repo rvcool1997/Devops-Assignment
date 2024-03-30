@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/rvcool1997/Devops-Assignment.git'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'npm run test'
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                script {
+                    docker.build('yourimage:tag')
+                }
+            }
+        }
+        stage('Docker Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.example.com', 'credentials-id') {
+                        docker.image('yourimage:tag').push('latest')
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'rsync -avz build/ user@server:/path/to/deployment'
+            }
+        }
+    
+    }
+    
+    post {
+        always {
+            // Execute linting and fail the pipeline if issues are found
+            sh 'npm run lint | grep "error" && exit 1 || true'
+        }
+    }
+}

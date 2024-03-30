@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/rvcool1997/Devops-Assignment.git'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'composer install'
+            }
+        }
+        stage('Lint') {
+            steps {
+                sh 'vendor/bin/phpcs --standard=WordPress src/'
+            }
+        }
+        stage('Build') {
+            steps {
+                // Commands to compile themes or plugins
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                script {
+                    docker.build('yourimage:tag')
+                }
+            }
+        }
+        stage('Docker Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.example.com', 'credentials-id') {
+                        docker.image('yourimage:tag').push('latest')
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                // Commands to deploy themes or plugins to WordPress server
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Fail the pipeline if linting issues are found
+            sh 'vendor/bin/phpcs --standard=WordPress src/ | grep "FOUND" && exit 1 || true'
+        }
+    }
+}
