@@ -1,0 +1,6 @@
+# Use the official WordPress image as base
+FROM wordpress:latest
+
+# Copy custom themes and plugins
+COPY ./themes /var/www/html/wp-content/themes/
+COPY ./plugins /var/www/html/wp-content/plugins/
